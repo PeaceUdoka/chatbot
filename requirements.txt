@@ -1,7 +1,7 @@
---upgrade pip
+
 langchain
 transformers
-langchain-community
+langchain_community
 unstructured
 sentence-transformers
 faiss-cpu
