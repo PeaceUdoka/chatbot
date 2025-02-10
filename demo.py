@@ -17,10 +17,10 @@ drive.mount('/content/drive')
 #!virtualenv /content/drive/MyDrive/Data/WiChat
 #!source /content/drive/MyDrive/Data/WiChat/bin/activate
 
-!curl -fsSL https://ollama.com/install.sh | sh
+#!curl -fsSL https://ollama.com/install.sh | sh
 
 # Commented out IPython magic to ensure Python compatibility.
-!pip install colab-xterm
+#!pip install colab-xterm
 # %load_ext colabxterm
 
 # Commented out IPython magic to ensure Python compatibility.
@@ -30,14 +30,14 @@ import os
 os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
 
 # install dependencies
-!pip install -qU langchain
-!pip install -qU transformers
-!pip install -qU langchain-community
-!pip install -qU unstructured
-!pip install -qU sentence-transformers
-!pip install -qU faiss-cpu
-!pip install -qU langchain_ollama
-!pip install -qU streamlit
+#!pip install -qU langchain
+#!pip install -qU transformers
+#!pip install -qU langchain-community
+#!pip install -qU unstructured
+#!pip install -qU sentence-transformers
+#!pip install -qU faiss-cpu
+#!pip install -qU langchain_ollama
+#!pip install -qU streamlit
 
 import streamlit as st
 from transformers import AutoTokenizer, pipeline  # Import necessary transformers modules
