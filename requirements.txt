@@ -1,0 +1,9 @@
+# install dependencies
+langchain
+transformers
+langchain-community
+unstructured
+sentence-transformers
+faiss-cpu
+langchain_ollama
+os
