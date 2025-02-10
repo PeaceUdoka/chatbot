@@ -45,7 +45,7 @@ from transformers import AutoTokenizer, pipeline  # Import necessary transformer
 # --- Langchain Imports ---
 from langchain_ollama import ChatOllama
 from langchain.chains import RetrievalQA
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import FAISS
 
@@ -129,37 +129,52 @@ if not st.session_state.model:
         st.session_state.model = initialize_model()
 
 
-# ---Define Prompt Template ---
-template = """You are WiChat, the chatbot for the Worldbank Ideas Project. You are friendly and follow instructions to answer questions extremely well. Please be truthful and give direct answers. If you don't know the answer, just say that you don't know, don't try to make up an answer. Keep the response short and concise in at most five sentences. If the user chats in a different language, translate accurately and respond in the same language. You will provide specific details and accurate answers to user queries on the Worldbank Ideas Project.
-                   Use the following pieces of context to answer the user's question.
-                   Context: {context}
-                   Question:{question}
-                   Helpful Answer: """
-prompt = PromptTemplate(input_variables=["context",  "question"], template=template)
 
-# ---Memory---
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+# Define the chat prompt
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system","You are WiChat, the chatbot for the Worldbank Ideas Project. You are friendly and follow instructions to answer questions extremely well. Please be truthful and give direct answers. If you don't know the answer, just say that you don't know, don't try to make up an answer. Keep the response short and concise in at most five sentences. If the user chats in a different language, translate accurately and respond in the same language. You will provide specific details and accurate answers to user queries on the Worldbank Ideas Project.),
+         MessagesPlaceholder("chat_history"),
+        ("human", "Use the user question {input} to answer the question. Use only the {context} to answer the question.")
+    ]
+)
 
 # --- Create RetrievalQA chain ---
-def retrievalqa_chain(db,model,prompt):
-    retrievalqa = RetrievalQA.from_chain_type(
-        llm=model,
-        chain_type="stuff",
-        retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 3}),
-        memory = memory,
-        chain_type_kwargs={"prompt": prompt}
-    )
-    question_answer_chain = create_stuff_documents_chain(model, prompt)
+from langchain.chains import create_history_aware_retriever
 
-    return retrievalqa, question_answer_chain
+contextualize_q_system_prompt = """Given a chat history and the latest user question \
+which might reference context in the chat history, formulate a standalone question \
+which can be understood without the chat history. Do NOT answer the question, \
+just reformulate it if needed and otherwise return it as is."""
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
 
+retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
+
+history_aware_retriever = create_history_aware_retriever(model, retriever, contextualize_q_prompt)
+
+question_answer_chain = create_stuff_documents_chain(model, prompt)
+
+rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+conversational_rag_chain = RunnableWithMessageHistory(
+    rag_chain,
+    st.session_state.messages,
+    input_messages_key="input",
+    history_messages_key="chat_history",
+    output_messages_key="answer",
+)
 
 # --- Response Generation ---
 def generate_response(query):
-    retrievalqa, question_answer_chain = retrievalqa_chain(st.session_state.db,st.session_state.model,prompt)
-    chain = create_retrieval_chain(retrievalqa, question_answer_chain)
-    response = chain.invoke({"input": query})
-    return result["answer"]
+    
+    return conversational_rag_chain.invoke({"input": query})["answer"]
+     
 
 # --- User Input ---
 user_input = st.chat_input("Ask WiChat anything...")
