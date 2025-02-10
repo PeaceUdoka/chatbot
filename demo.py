@@ -78,6 +78,7 @@ docs = load_data(path)
 
 data = get_chunks(docs)
 
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 
@@ -103,7 +104,7 @@ db = store_data(data, embeddings)
 
 # --- Application Title and Description ---
 st.title("WiChat")
-st.markdown("Welcome!!! WiChat wants to know what's on your mind")
+st.markdown("Welcome!!! I'm WiChat. What can I help you with today?")
 
 # --- Session State Initialization ---
 if "messages" not in st.session_state:
@@ -147,14 +148,17 @@ def retrievalqa_chain(db,model,prompt):
         memory = memory,
         chain_type_kwargs={"prompt": prompt}
     )
-    return retrievalqa
+     question_answer_chain = create_stuff_documents_chain(model, prompt)
 
-retrievalqa = retrievalqa_chain(st.session_state.db,st.session_state.model,prompt)
+    return retrievalqa, question_answer_chain
+
 
 # --- Response Generation ---
 def generate_response(question, retrievalqa):
-    answer = retrievalqa({"query": question})
-    return answer["result"]
+    retrievalqa, question_answer_chain = retrievalqa_chain(st.session_state.db,st.session_state.model,prompt)
+    chain = create_retrieval_chain(retrieverqa, question_answer_chain)
+    return chain.invoke({"input": query})
+    
 
 # --- User Input ---
 user_input = st.chat_input("Ask WiChat anything...")
