@@ -13,9 +13,9 @@ from google.colab import drive
 drive.mount('/content/drive')
 # %cd /content/drive/MyDrive/Data/WiChat
 
-!pip install virtualenv
-!virtualenv /content/drive/MyDrive/Data/WiChat
-!source /content/drive/MyDrive/Data/WiChat/bin/activate
+#!pip install virtualenv
+#!virtualenv /content/drive/MyDrive/Data/WiChat
+#!source /content/drive/MyDrive/Data/WiChat/bin/activate
 
 !curl -fsSL https://ollama.com/install.sh | sh
 
