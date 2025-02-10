@@ -197,5 +197,3 @@ with st.sidebar:
 
     login_button = st.button("Login")  # Direct navigation, no popup
     signup_button = st.button("Sign Up") # Direct Navigation, no popup
-
-!streamlit run /usr/local/lib/python3.11/dist-packages/colab_kernel_launcher.py
