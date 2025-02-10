@@ -24,7 +24,7 @@ Original file is located at
 
 # Commented out IPython magic to ensure Python compatibility.
 # %xterm
-#pip install requirements.txt
+pip install requirements.txt
 import os
 os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
 
