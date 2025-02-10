@@ -192,8 +192,6 @@ user_input = st.chat_input("Ask WiChat anything...")
 
 # --- Process User Input ---
 if user_input:
-    # Append user message to chat history
-    st.session_state.messages.append({"role": "user", "content": user_input})
 
     # --- Generate Chatbot Response ---
     with st.spinner():
