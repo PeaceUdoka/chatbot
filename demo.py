@@ -141,6 +141,7 @@ prompt = ChatPromptTemplate.from_messages(
 
 # --- Create RetrievalQA chain ---
 from langchain.chains import create_history_aware_retriever
+from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
 contextualize_q_system_prompt = """Given a chat history and the latest user question \
@@ -155,6 +156,14 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
+store = {}
+
+
+def get_session_history(session_id: str) -> BaseChatMessageHistory:
+    if session_id not in store:
+        store[session_id] = ChatMessageHistory()
+    return store[session_id]
+    
 retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 
 history_aware_retriever = create_history_aware_retriever(st.session_state.model, retriever, contextualize_q_prompt)
@@ -165,7 +174,7 @@ rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chai
 
 conversational_rag_chain = RunnableWithMessageHistory(
     rag_chain,
-    st.session_state.messages,
+    get_session_history,
     input_messages_key="input",
     history_messages_key="chat_history",
     output_messages_key="answer",
