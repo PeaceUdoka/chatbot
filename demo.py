@@ -78,6 +78,7 @@ docs = load_data(path)
 
 data = get_chunks(docs)
 
+from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
