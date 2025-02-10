@@ -156,13 +156,6 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-store = {}
-
-
-def get_session_history(session_id: str) -> BaseChatMessageHistory:
-    if session_id not in store:
-        store[session_id] = ChatMessageHistory()
-    return store[session_id]
     
 retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 
@@ -185,7 +178,7 @@ def generate_response(query):
     
     return conversational_rag_chain.invoke({"input": query})["answer"]
      
-
+st.session_state.messages = ChatMessageHistory()
 # --- User Input ---
 user_input = st.chat_input("Ask WiChat anything...")
 
