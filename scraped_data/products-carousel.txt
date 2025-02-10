@@ -1,0 +1,4 @@
+Beautiful & Clean
+Products Carousel
+Create products carousel with different style possibilities.Default style
+Simple and minimal product style.
