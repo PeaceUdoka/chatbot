@@ -1,4 +1,4 @@
-
+--upgrade pip
 langchain
 transformers
 langchain-community
