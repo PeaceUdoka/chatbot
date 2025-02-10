@@ -6,5 +6,4 @@ unstructured
 sentence-transformers
 faiss-cpu
 langchain-ollama
-os
 numpy
