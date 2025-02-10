@@ -158,7 +158,7 @@ def retrievalqa_chain(db,model,prompt):
 def generate_response(question):
     retrievalqa, question_answer_chain = retrievalqa_chain(st.session_state.db,st.session_state.model,prompt)
     chain = create_retrieval_chain(retrievalqa, question_answer_chain)
-    return chain.invoke({"input": question})
+    return chain.invoke({"input": query})
     
 
 # --- User Input ---
