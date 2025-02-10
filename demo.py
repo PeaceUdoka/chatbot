@@ -154,7 +154,7 @@ def retrievalqa_chain(db,model,prompt):
 
 
 # --- Response Generation ---
-def generate_response(question, retrievalqa):
+def generate_response(question):
     retrievalqa, question_answer_chain = retrievalqa_chain(st.session_state.db,st.session_state.model,prompt)
     chain = create_retrieval_chain(retrieverqa, question_answer_chain)
     return chain.invoke({"input": query})
@@ -171,7 +171,7 @@ if user_input:
     # --- Generate Chatbot Response ---
     with st.spinner():
         #chatbot_response = st.session_state.model(user_input)
-        chatbot_response = generate_response(user_input, retrievalqa)
+        chatbot_response = generate_response(user_input)
 
         # --- Append chatbot message to chat history ---
         st.session_state.messages.append({"role": "assistant", "content": chatbot_response})
