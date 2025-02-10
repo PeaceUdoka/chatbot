@@ -141,6 +141,7 @@ prompt = ChatPromptTemplate.from_messages(
 
 # --- Create RetrievalQA chain ---
 from langchain.chains import create_history_aware_retriever
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 contextualize_q_system_prompt = """Given a chat history and the latest user question \
 which might reference context in the chat history, formulate a standalone question \
