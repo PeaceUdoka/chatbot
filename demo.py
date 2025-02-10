@@ -184,7 +184,7 @@ conversational_rag_chain = RunnableWithMessageHistory(
 # --- Response Generation ---
 def generate_response(query):
     
-    return conversational_rag_chain.invoke({"input": query}, config={"configurable": {"session_id": "1"})["answer"]
+    return conversational_rag_chain.invoke({"input": query}, config={"configurable": {"session_id": "1"}})["answer"]
      
 
 # --- User Input ---
