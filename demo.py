@@ -156,6 +156,7 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
+st.session_state.messages = ChatMessageHistory()
     
 retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 
@@ -167,7 +168,7 @@ rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chai
 
 conversational_rag_chain = RunnableWithMessageHistory(
     rag_chain,
-    get_session_history,
+    st.session_state.messages,   
     input_messages_key="input",
     history_messages_key="chat_history",
     output_messages_key="answer",
@@ -178,7 +179,7 @@ def generate_response(query):
     
     return conversational_rag_chain.invoke({"input": query})["answer"]
      
-st.session_state.messages = ChatMessageHistory()
+
 # --- User Input ---
 user_input = st.chat_input("Ask WiChat anything...")
 
