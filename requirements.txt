@@ -1,10 +1,10 @@
 
 langchain
 transformers
-langchain_community
+langchain-community
 unstructured
 sentence-transformers
 faiss-cpu
-langchain_ollama
+langchain-ollama
 os
 numpy
