@@ -156,9 +156,9 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages(
 
 retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 
-history_aware_retriever = create_history_aware_retriever(model, retriever, contextualize_q_prompt)
+history_aware_retriever = create_history_aware_retriever(st.session_state.mode, retriever, contextualize_q_prompt)
 
-question_answer_chain = create_stuff_documents_chain(model, prompt)
+question_answer_chain = create_stuff_documents_chain(st.session_state.mode, prompt)
 
 rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
