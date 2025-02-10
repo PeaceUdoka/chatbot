@@ -9,8 +9,8 @@ Original file is located at
 
 # Commented out IPython magic to ensure Python compatibility.
 #move to the folder where the scraped data is on your device
-from google.colab import drive
-drive.mount('/content/drive')
+#from google.colab import drive
+#drive.mount('/content/drive')
 # %cd /content/drive/MyDrive/Data/WiChat
 
 #!pip install virtualenv
@@ -73,7 +73,7 @@ def get_chunks(docs):
 
     return chunks
 
-path = '/content/drive/MyDrive/Data/WiChat/scraped_data'
+path = 'scraped_data'
 docs = load_data(path)
 
 data = get_chunks(docs)
