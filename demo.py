@@ -148,7 +148,7 @@ def retrievalqa_chain(db,model,prompt):
         memory = memory,
         chain_type_kwargs={"prompt": prompt}
     )
-     question_answer_chain = create_stuff_documents_chain(model, prompt)
+    question_answer_chain = create_stuff_documents_chain(model, prompt)
 
     return retrievalqa, question_answer_chain
 
