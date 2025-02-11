@@ -25,8 +25,8 @@ Original file is located at
 # Commented out IPython magic to ensure Python compatibility.
 # %xterm
 #pip install requirements.txt
-import os
-os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
+#import os
+#os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
 
 # install dependencies
 #!pip install -qU langchain
@@ -37,7 +37,8 @@ os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
 #!pip install -qU faiss-cpu
 #!pip install -qU langchain_ollama
 #!pip install -qU streamlit
-
+import ollama
+from ollama import chat
 import streamlit as st
 from transformers import AutoTokenizer, pipeline  # Import necessary transformers modules
 
@@ -120,7 +121,7 @@ if "tokenizer" not in st.session_state:
 # --- Initialize Chatbot Model (Load on App Start) ---
 @st.cache_resource  # Cache this function to load the model only once
 def initialize_model():
-    model = ChatOllama(model="phi3:mini", temperature=0) # Check that phi3:mini is available on your system
+    model = ollama.chat(model="phi3:mini", temperature=0) # Check that phi3:mini is available on your system
     return model
 
 if not st.session_state.model:
