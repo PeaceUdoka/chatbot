@@ -73,7 +73,8 @@ def initialize_model():
     llm = ChatOpenAI(model_name=MODEL, openai_api_key=openai.api_key, temperature=0.7) # Check that phi3:mini is available on your system
     return llm
 
-
+if "model" not in st.session_state:
+    st.session_state.model = None
 
 if not st.session_state.model:
     with st.spinner("Initializing Chatbot..."):
