@@ -6,5 +6,5 @@ langchain-community
 unstructured
 sentence-transformers
 faiss-cpu
-langchain-ollama
+langchain-openai
 numpy
