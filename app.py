@@ -75,9 +75,16 @@ def initialize_model():
     repo_id="microsoft/Phi-3-mini-4k-instruct", 
     model_kwargs={"temperature": 0.5})
     return llm
-
+# --- Session State Initialization ---
+if "messages" not in st.session_state:
+    st.session_state.messages = []  # Store chat history
+if "db" not in st.session_state:
+    st.session_state.db = db
 if "model" not in st.session_state:
     st.session_state.model = None
+if "tokenizer" not in st.session_state:
+    st.session_state.tokenizer = None
+
 
 if not st.session_state.model:
     with st.spinner("Initializing Chatbot..."):
