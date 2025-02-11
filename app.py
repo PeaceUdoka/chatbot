@@ -21,7 +21,6 @@ if not openai.api_key:
 from langchain.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-
 # ensure the notebook is in the same folder as the data files
 # load all txt files
 def load_data(path):
@@ -41,8 +40,10 @@ def get_chunks(docs):
 
     return chunks
 
-path = '/content/drive/MyDrive/Data/WiChat/scraped_data'
+path = 'scraped_data'
 docs = load_data(path)
+
+data = get_chunks(docs)
 
 data = get_chunks(docs)
 from langchain.embeddings import HuggingFaceEmbeddings
