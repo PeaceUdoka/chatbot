@@ -51,7 +51,7 @@ def embed(data, device, model):
   )
   return embeddings
 
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass(st.secrets.huggingfacetoken)
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass("Enter token: ")
 
 # 2. Load Data & Setup Vectorstore (Simplified for now)
 @st.cache_resource
