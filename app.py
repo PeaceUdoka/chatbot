@@ -54,7 +54,7 @@ from huggingface_hub import InferenceClient
 
 client = InferenceClient(
 	provider="hf-inference",
-	api_key="hf_xxxxxxxxxxxxxxxxxxxxxxxx"
+	api_key=st.secrets.huggingfacetoken
 )
 
 # 2. Load Data & Setup Vectorstore (Simplified for now)
