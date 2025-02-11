@@ -45,7 +45,6 @@ docs = load_data(path)
 
 data = get_chunks(docs)
 
-data = get_chunks(docs)
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 
@@ -63,7 +62,7 @@ def embed(data, device, model):
 
 
 # 2. Load Data & setup vectorstore
-@st.cache_resource
+
 def store_data(data, embeddings):
   # vector store
   db = FAISS.from_documents(data, embeddings)
