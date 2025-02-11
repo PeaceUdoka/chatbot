@@ -2,7 +2,6 @@ from langchain.llms import HuggingFaceHub
 import os
 from getpass import getpass
 
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass(st.secrets.huggingfacetoken)
 
 import streamlit as st
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -52,6 +51,7 @@ def embed(data, device, model):
   )
   return embeddings
 
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass(st.secrets.huggingfacetoken)
 
 # 2. Load Data & Setup Vectorstore (Simplified for now)
 @st.cache_resource
