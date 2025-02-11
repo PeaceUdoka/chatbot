@@ -145,7 +145,7 @@ if prompt := st.chat_input(placeholder="Ask me anything!"):
         )
 
     #11 Get assistant history and print
-    st.chat_message("assistant").write(response["answer"])
+    st.chat_message("assistant").write(response["answer"].content)
     streamlit_chat_history = get_session_history(st.session_state.session_id)
 
 #12. Print all messages at the end:
