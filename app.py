@@ -1,81 +1,22 @@
-from huggingface_hub import InferenceClient
 
-from langchain.llms import HuggingFaceHub
-import os
 
+from langchain_huggingface import ChatHuggingFace
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnablePassthrough
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain_core.planners import create_history_aware_retriever
+from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
+from langchain_core.memory import BaseChatMessageHistory, ChatMessageHistory
 
 import streamlit as st
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_core.documents import Document
-from langchain.document_loaders import DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain.chains import create_history_aware_retriever, create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.chat_history import BaseChatMessageHistory  # Import this!
-from langchain_ollama import ChatOllama
-from langchain.embeddings import HuggingFaceEmbeddings
-# ensure the notebook is in the same folder as the data files
-# load all txt files
-def load_data(path):
-  loader1 = DirectoryLoader(path, glob = '*.txt', show_progress = True)
-  # get content of txt files
-  docs = loader1.load()
+from langchain.vectorstores import Chroma
 
-  return docs
-
-
-def get_chunks(docs):
-
-    # split the txt files into chunks of 1000 characters and 150 characters overlap
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 150)
-    chunks = text_splitter.split_documents(docs)
-
-
-    return chunks
-
-path = 'scraped_data'
-docs = load_data(path)
-
-data = get_chunks(docs)
-# embed data sources
-def embed(data, device, model):
-  model_kwargs = {'device': device}
-  encode_kwargs = {'normalize_embeddings': False}
-
-  embeddings = HuggingFaceEmbeddings(
-    model_name = model,
-    model_kwargs = model_kwargs,
-    encode_kwargs = encode_kwargs
-  )
-  return embeddings
-
-
-# 2. Load Data & Setup Vectorstore (Simplified for now)
-@st.cache_resource
-def store_data(_data, _embeddings):
-  # vector store
-  db = FAISS.from_documents(data, embeddings)
-  return db
-
-embeddings = embed(data, 'cpu', 'sentence-transformers/all-MiniLM-L6-v2')
-db = store_data(data, embeddings)
-
-# 3. Create Chat Model
-@st.cache_resource  # Cache this function to load the model only once
-def initialize_model():
-    client = InferenceClient(provider="hf-inference",api_key=st.secrets.huggingfacetoken)
-    llm = "microsoft/Phi-3-mini-4k-instruct"
-    return llm
-
-if "model" not in st.session_state:
-    st.session_state.model = None
-
-if not st.session_state.model:
-    with st.spinner("Initializing Chatbot..."):
-        st.session_state.model = initialize_model()
+# 1.  Model Setup
+api_key = "YOUR_API_KEY"  # Replace with your actual API key
+st.session_state.model = ChatHuggingFace(
+    api_key=st.secrets.huggingfacetoken, model="microsoft/Phi-3-mini-4k-instruct"
+)
 
 
 # 4. Prompt Template
@@ -105,23 +46,68 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
         store[session_id] = ChatMessageHistory()
     return store[session_id]
 
+def create_history_aware_retriever(llm, retriever, contextualize_q_prompt):
+    """Create a chain to generate the standalone question for history aware retriever."""
+    from langchain_core.runnables import chain
+
+    template = contextualize_q_prompt
+
+    def generate_standalone_question(input, chat_history):
+        messages = template.format_messages(
+            input=input,
+            chat_history=chat_history
+        )
+
+        for m in messages:
+            if m.type == "human":
+                messages[messages.index(m)] = HumanMessage(content = m.content)
+            if m.type == "ai":
+                messages[messages.index(m)] = AIMessage(content = m.content)
+            
+            standalone_question = llm.invoke(messages).content
+            return standalone_question
+        
+        retriever_chain = RunnablePassthrough.assign(
+            standalone_question=generate_standalone_question
+        ) | retriever
+
+        return retriever_chain
+
 # 7. RAG Chain construction
+@st.cache_resource
+def store_data(_data, _embeddings):
+  # vector store
+  db = FAISS.from_documents(data, embeddings)
+  return db
+
+embeddings = embed(data, 'cpu', 'sentence-transformers/all-MiniLM-L6-v2')
+db = store_data(data, embeddings)
+
+
 retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 history_aware_retriever = create_history_aware_retriever(st.session_state.model, retriever, contextualize_q_prompt)
 question_answer_chain = create_stuff_documents_chain(st.session_state.model, prompt)
 rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
-conversational_rag_chain = RunnableWithMessageHistory(
-    rag_chain,
-    get_session_history,
-    input_messages_key="input",
-    history_messages_key="chat_history",
-    output_messages_key="answer",
+from langchain_core.runnables import chain
+from langchain_core.runnables import RunnableLambda
+
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+
+rag_chain = (
+    {"context": history_aware_retriever | format_docs, "input": RunnablePassthrough()}
+    | prompt
+    | st.session_state.model
+)
+
+conversational_rag_chain = RunnablePassthrough.assign(
+    answer = rag_chain
 )
 
 # 8. Streamlit UI
 st.title("WiChat")
-st.markdown("Welcome! Ask me anything related to the World Bank.")
+st.markdown("Welcome!")
 
 # 9. Session Management
 if "session_id" not in st.session_state:
@@ -132,18 +118,28 @@ if prompt := st.chat_input(placeholder="Ask me anything!"):
     st.session_state.prompt = prompt  #Save input text
     st.chat_message("user").write(prompt)
     st.session_state.past_messages = get_session_history(st.session_state.session_id).messages # load messages with custom function
+
+    # Format chat history correctly
+    chat_history = get_session_history(st.session_state.session_id).messages
+    formatted_chat_history = []
+    for msg in chat_history:
+        if msg.type == "human":
+            formatted_chat_history.append(HumanMessage(content = msg.content))
+        if msg.type == "ai":
+            formatted_chat_history.append(AIMessage(content = msg.content))
+
     with st.spinner():
         response = conversational_rag_chain.invoke(
-            {"input": st.session_state.prompt},
+            {"input": st.session_state.prompt, "chat_history": formatted_chat_history},
             config={"configurable": {"session_id": "1"}},
         )
 
     #11 Get assistant history and print
-    st.chat_message("assistant").write(response["answer"])
+    st.chat_message("assistant").write(response["answer"].content)
     streamlit_chat_history = get_session_history(st.session_state.session_id)
 
-#12. Print all messages at the end:
-if "session_id" in st.session_state:
-    messages = get_session_history(st.session_state.session_id).messages
-    for msg in messages:
-        st.chat_message(msg.type).write(msg.content)
+    #12. Print all messages at the end:
+    if "session_id" in st.session_state:
+        messages = get_session_history(st.session_state.session_id).messages
+        for msg in messages:
+            st.chat_message(msg.type).write(msg.content)
