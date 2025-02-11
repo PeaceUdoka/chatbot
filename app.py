@@ -68,7 +68,17 @@ embeddings = embed(data, 'cpu', 'sentence-transformers/all-MiniLM-L6-v2')
 db = store_data(data, embeddings)
 
 # 3. Create Chat Model
-llm = ChatOpenAI(model_name=MODEL, openai_api_key=openai.api_key, temperature=0.7)
+@st.cache_resource  # Cache this function to load the model only once
+def initialize_model():
+    llm = ChatOpenAI(model_name=MODEL, openai_api_key=openai.api_key, temperature=0.7) # Check that phi3:mini is available on your system
+    return llm
+
+
+
+if not st.session_state.model:
+    with st.spinner("Initializing Chatbot..."):
+        st.session_state.model = initialize_model()
+
 
 # 4. Prompt Template
 prompt = ChatPromptTemplate.from_messages(
@@ -99,8 +109,8 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 
 # 7. RAG Chain construction
 retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
-question_answer_chain = create_stuff_documents_chain(llm, prompt)
+history_aware_retriever = create_history_aware_retriever(st.session_state.model, retriever, contextualize_q_prompt)
+question_answer_chain = create_stuff_documents_chain(st.session_state.model, prompt)
 rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
 conversational_rag_chain = RunnableWithMessageHistory(
