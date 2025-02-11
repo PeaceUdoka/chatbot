@@ -1,6 +1,5 @@
 from langchain.llms import HuggingFaceHub
 import os
-from getpass import getpass
 
 
 import streamlit as st
@@ -51,7 +50,12 @@ def embed(data, device, model):
   )
   return embeddings
 
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass("Enter token: ")
+from huggingface_hub import InferenceClient
+
+client = InferenceClient(
+	provider="hf-inference",
+	api_key="hf_xxxxxxxxxxxxxxxxxxxxxxxx"
+)
 
 # 2. Load Data & Setup Vectorstore (Simplified for now)
 @st.cache_resource
