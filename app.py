@@ -1,9 +1,11 @@
+
+import os
+os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
+
 import streamlit as st
-import openai
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_openai import ChatOpenAI
 from langchain_core.documents import Document
 from langchain.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -11,12 +13,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.chat_history import BaseChatMessageHistory  # Import this!
-
-# 1. Authentication
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-if not openai.api_key:
-    st.warning("OpenAI API key not found. Please add it to streamlit secrets.")
-    st.stop()
+from langchain_ollama import ChatOllama
 
 MODEL = "gpt-4o"  # Specify the GPT-4o model
 
@@ -70,7 +67,7 @@ db = store_data(data, embeddings)
 # 3. Create Chat Model
 @st.cache_resource  # Cache this function to load the model only once
 def initialize_model():
-    llm = ChatOpenAI(model_name=MODEL, openai_api_key=openai.api_key, temperature=0.7) # Check that phi3:mini is available on your system
+    llm = ChatOllama(model="phi3:mini", temperature=0) 
     return llm
 
 if "model" not in st.session_state:
