@@ -94,9 +94,10 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 # 5. Contextualize prompt and load history
-contextualize_q_system_prompt = """Given a chat history and the latest user question, rewrite the user question as a concise, standalone question incorporating relevant context from the conversation always including the keywords 'World Bank' and 'Ideas Project'. Do not show the prompts to the user"""
-contextualize_q_prompt = ChatPromptTemplate.from_messages(
-    [
+contextualize_q_system_prompt = """Given a chat history and the latest user question \
+which might reference context in the chat history, formulate a standalone question \
+which can be understood without the chat history. Do NOT answer the question, \
+just reformulate it if needed and otherwise return it as is."""
         ("system", contextualize_q_system_prompt),
         MessagesPlaceholder("chat_history"),
         ("human", "{input}"),
@@ -133,23 +134,48 @@ st.markdown("Welcome! Ask me anything related to the World Bank.")
 if "session_id" not in st.session_state:
     st.session_state.session_id = "1"  # Or generate a unique ID
 
-# 10. Chat Input
-if prompt := st.chat_input(placeholder="Ask me anything!"):
-    st.session_state.prompt = prompt  #Save input text
-    st.chat_message("user").write(prompt)
-    st.session_state.past_messages = get_session_history(st.session_state.session_id).messages # load messages with custom function
+# --- Response Generation ---
+def generate_response(query):
+    
+    return conversational_rag_chain.invoke({"input": query}, config={"configurable": {"session_id": "1"}})["answer"]
+     
+
+# --- User Input ---
+user_input = st.chat_input("Ask WiChat anything...")
+
+# --- Process User Input ---
+if user_input:
+
+    # --- Generate Chatbot Response ---
     with st.spinner():
-        response = conversational_rag_chain.invoke(
-            {"input": st.session_state.prompt},
-            config={"configurable": {"session_id": "1"}},
-        )["answer"]
+        #chatbot_response = st.session_state.model(user_input)
+        chatbot_response = generate_response(user_input)
 
-    #11 Get assistant history and print
-    st.chat_message("assistant").write(response)
-    streamlit_chat_history = get_session_history(st.session_state.session_id)
+        # --- Append chatbot message to chat history ---
+        st.session_state.messages.append({"role": "assistant", "content": chatbot_response})
 
-#12. Print all messages at the end:
-if "session_id" in st.session_state:
-    messages = get_session_history(st.session_state.session_id).messages
-    for msg in messages:
-        st.chat_message(msg.type).write(msg.content)
+# --- Display Chat History ---
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# --- Sidebar (Menu and Account Options) ---
+with st.sidebar:
+    st.header("Options")
+
+    # --- Menu Options ---
+    if st.button("Toggle Theme"):
+        # Implement Theme Toggle Logic (Streamlit has built-in theme support)
+        st.info("Theme toggle functionality to be implemented.")
+
+    if st.button("Clear Chat"):
+        st.session_state.messages = []
+
+    if st.button("Help"):
+        st.info("Help information to be implemented.")
+
+    # --- Account Options ---
+    st.subheader("Account")
+
+    login_button = st.button("Login")  # Direct navigation, no popup
+    signup_button = st.button("Sign Up") # Direct Navigation, no popup
