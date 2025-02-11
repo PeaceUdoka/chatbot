@@ -89,12 +89,12 @@ prompt = ChatPromptTemplate.from_messages(
     [
         ("system","You are WiChat, the chatbot for the Worldbank Ideas Project. You are friendly and follow instructions to answer questions extremely well. Please be truthful and give direct answers. If you don't know the answer, just say that you don't know, don't try to make up an answer. Keep the response short and concise in at most five sentences. If the user chats in a different language, translate accurately and respond in the same language. You will provide specific details and accurate answers to user queries on the Worldbank Ideas Project."),
          MessagesPlaceholder("chat_history"),
-        ("human", "Use the user question {input} to answer the question. Use only the {context} to answer the question.")
+        ("human", "Use only the {context} to answer the question {input}.")
     ]
 )
 
 # 5. Contextualize prompt and load history
-contextualize_q_system_prompt = """Given a chat history and the latest user question which might reference context in the chat history, formulate a standalone question which can be understood without the chat history. Do NOT answer the question, just reformulate it if needed and otherwise return it as is."""
+contextualize_q_system_prompt = """Given a chat history and the latest user question, rewrite the user question as a concise, standalone question incorporating relevant context from the conversation always including the keywords 'World Bank' and 'Ideas Project'. Do not answer the question."""
 contextualize_q_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", contextualize_q_system_prompt),
