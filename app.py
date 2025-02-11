@@ -66,7 +66,7 @@ db = store_data(data, embeddings)
 # 3. Create Chat Model
 @st.cache_resource  # Cache this function to load the model only once
 def initialize_model():
-    client = InferenceClient(provider="hf-inference",api_key=os.getenv(huggingfacetoken),
+    client = InferenceClient(provider="hf-inference",api_key=st.secrets(huggingfacetoken),
     model="microsoft/Phi-3-mini-4k-instruct", max_tokens=500)
 
     return llm
