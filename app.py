@@ -1,6 +1,8 @@
-
+from langchain.llms import HuggingFaceHub
 import os
-os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
+from getpass import getpass
+
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass("HF Token:", token)
 
 import streamlit as st
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -14,9 +16,6 @@ from langchain.chains import create_history_aware_retriever, create_retrieval_ch
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.chat_history import BaseChatMessageHistory  # Import this!
 from langchain_ollama import ChatOllama
-
-MODEL = "gpt-4o"  # Specify the GPT-4o model
-
 from langchain.embeddings import HuggingFaceEmbeddings
 # ensure the notebook is in the same folder as the data files
 # load all txt files
@@ -67,7 +66,9 @@ db = store_data(data, embeddings)
 # 3. Create Chat Model
 @st.cache_resource  # Cache this function to load the model only once
 def initialize_model():
-    llm = ChatOllama(model="phi3:mini", temperature=0) 
+    llm = HuggingFaceHub(
+    repo_id="microsoft/DialoGPT-small", 
+    model_kwargs={"temperature": 0.5)
     return llm
 
 if "model" not in st.session_state:
