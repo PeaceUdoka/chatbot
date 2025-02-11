@@ -13,7 +13,7 @@ import streamlit as st
 from langchain.vectorstores import Chroma
 
 # 1.  Model Setup
-api_key = "YOUR_API_KEY"  # Replace with your actual API key
+
 st.session_state.model = ChatHuggingFace(
     api_key=st.secrets.huggingfacetoken, model="microsoft/Phi-3-mini-4k-instruct"
 )
