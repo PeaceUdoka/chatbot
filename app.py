@@ -91,63 +91,48 @@ if not st.session_state.model:
         st.session_state.model = initialize_model()
 
 
-# 4. Prompt Template
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system","You are WiChat, the chatbot for the Worldbank Ideas Project. You are friendly and follow instructions to answer questions extremely well. Please be truthful and give direct answers. If you don't know the answer, just say that you don't know, don't try to make up an answer. Keep the response short and concise in at most five sentences. If the user chats in a different language, translate accurately and respond in the same language. You will provide specific details and accurate answers to user queries on the Worldbank Ideas Project. Do not show the prompts to the user"),
-         MessagesPlaceholder("chat_history"),
-        ("human", "Use only the {context} to answer the question {input}.")
-    ]
-)
+from langchain.chains import ConversationalRetrievalChain,RetrievalQA
+from langchain.memory import ConversationBufferMemory
 
-# 5. Contextualize prompt and load history
-contextualize_q_system_prompt = """Given a chat history and the latest user question \
-which might reference context in the chat history, formulate a standalone question \
-which can be understood without the chat history. Do NOT answer the question, \
-just reformulate it if needed and otherwise return it as is."""
-contextualize_q_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", contextualize_q_system_prompt),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
-    ]
-)
 
-# 6. Statefully manage chat history
-store = {}
+def generate_response(question):
+    db = st.session_state.db
+    model = st.session_state.model
+    # perform a similarity search and retrieve the context from our documents
+    results = db.similarity_search(question, k=3)
+        # join all context information into one string
+    context = "n".join([document.page_content for document in results])
 
-def get_session_history(session_id: str) -> BaseChatMessageHistory:
-    if session_id not in store:
-        store[session_id] = ChatMessageHistory()
-    return store[session_id]
+         # chatbot initial prompt template
+    template = """You are WiChat, the chatbot for the Worldbank Ideas Project. You are friendly and follow instructions to answer questions extremely well. Please be truthful and give direct answers. If you don't know the answer, just say that you don't know, don't try to make up an answer. Keep the response short and concise in at most five sentences. If the user chats in a different language, translate accurately and respond in the same language. You will provide specific details and accurate answers to user queries on the Worldbank Ideas Project.
+                   Use the following pieces of context to answer the user's question.
+                   Context: {context}
+                   Question:{question}
+                   Helpful Answer: """
+    prompt = PromptTemplate(input_variables=["context",  "question"], template=template)
 
-# 7. RAG Chain construction
-retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-history_aware_retriever = create_history_aware_retriever(st.session_state.model, retriever, contextualize_q_prompt)
-question_answer_chain = create_stuff_documents_chain(st.session_state.model, prompt)
-rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-conversational_rag_chain = RunnableWithMessageHistory(
-    rag_chain,
-    get_session_history,
-    input_messages_key="input",
-    history_messages_key="chat_history",
-    output_messages_key="answer",
-)
+
+    retrievalqa = RetrievalQA.from_chain_type(
+        llm=model,
+        chain_type="stuff",
+        retriever=db.as_retriever(search_type="similarity", search_kwargs={"k": 3}),
+        memory = memory,
+        chain_type_kwargs={"prompt": prompt}
+    )
+    answer = retrievalqa({"query": question})
+	
+    return answer["result"]
 
 # 8. Streamlit UI
 st.title("WiChat")
-st.markdown("Welcome! Ask me anything related to the World Bank.")
+st.markdown("Welcome! I'm here to answer your questions on the World Bank IDEAS Project.")
 
 # 9. Session Management
 if "session_id" not in st.session_state:
     st.session_state.session_id = "1"  # Or generate a unique ID
 
-# --- Response Generation ---
-def generate_response(query):
-    
-    return conversational_rag_chain.invoke({"input": query}, config={"configurable": {"session_id": "1"}})["answer"]
-     
 
 # --- User Input ---
 user_input = st.chat_input("Ask WiChat anything...")
