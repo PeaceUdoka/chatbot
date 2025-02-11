@@ -121,7 +121,7 @@ if "tokenizer" not in st.session_state:
 # --- Initialize Chatbot Model (Load on App Start) ---
 @st.cache_resource  # Cache this function to load the model only once
 def initialize_model():
-    model = ollama.chat(model="phi3:mini", temperature=0) # Check that phi3:mini is available on your system
+    model = ollama.chat(model="phi3:mini") # Check that phi3:mini is available on your system
     return model
 
 if not st.session_state.model:
