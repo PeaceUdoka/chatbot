@@ -56,6 +56,7 @@ client = InferenceClient(
 	provider="hf-inference",
 	api_key=st.secrets.huggingfacetoken
 )
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = st.secrets.huggingfacetoken
 
 # 2. Load Data & Setup Vectorstore (Simplified for now)
 @st.cache_resource
