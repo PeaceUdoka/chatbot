@@ -1,8 +1,8 @@
+from huggingface_hub import InferenceClient
+
 from langchain.llms import HuggingFaceHub
 import os
-from getpass import getpass
 
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass("HF Token:")
 
 import streamlit as st
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -66,9 +66,9 @@ db = store_data(data, embeddings)
 # 3. Create Chat Model
 @st.cache_resource  # Cache this function to load the model only once
 def initialize_model():
-    llm = HuggingFaceHub(
-    repo_id="microsoft/DialoGPT-small", 
-    model_kwargs={"temperature": 0.5})
+    client = InferenceClient(provider="hf-inference",api_key="hf_xxxxxxxxxxxxxxxxxxxxxxxx",
+    model="microsoft/Phi-3-mini-4k-instruct", max_tokens=500)
+
     return llm
 
 if "model" not in st.session_state:
