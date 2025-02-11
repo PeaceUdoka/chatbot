@@ -59,7 +59,7 @@ def embed(data, device, model):
 
 # 2. Load Data & Setup Vectorstore (Simplified for now)
 @st.cache_resource
-def store_data(data, embeddings):
+def store_data(_data, embeddings):
   # vector store
   db = FAISS.from_documents(data, embeddings)
   return db
