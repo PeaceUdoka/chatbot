@@ -42,6 +42,8 @@ from ollama import chat
 import streamlit as st
 from transformers import AutoTokenizer, pipeline  # Import necessary transformers modules
 
+ollama pull phi3:mini
+
 # --- Langchain Imports ---
 from langchain_ollama import ChatOllama
 from langchain.chains import RetrievalQA
