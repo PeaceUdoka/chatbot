@@ -2,7 +2,7 @@ from langchain.llms import HuggingFaceHub
 import os
 from getpass import getpass
 
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass(token)
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass("HF Token:")
 
 import streamlit as st
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
