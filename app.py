@@ -142,10 +142,10 @@ if prompt := st.chat_input(placeholder="Ask me anything!"):
         response = conversational_rag_chain.invoke(
             {"input": st.session_state.prompt},
             config={"configurable": {"session_id": "1"}},
-        )
+        )["answer"]
 
     #11 Get assistant history and print
-    st.chat_message("assistant").write(response["answer"].content)
+    st.chat_message("assistant").write(response)
     streamlit_chat_history = get_session_history(st.session_state.session_id)
 
 #12. Print all messages at the end:
