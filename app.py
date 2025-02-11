@@ -10,7 +10,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_core.documents import Document
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
-from langchain.chain.combine_documents import create_stuff_documents_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 
 # 1. Authentication
 openai.api_key = st.secrets["OPENAI_API_KEY"]
