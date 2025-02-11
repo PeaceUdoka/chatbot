@@ -68,7 +68,7 @@ db = store_data(data, embeddings)
 def initialize_model():
     llm = HuggingFaceHub(
     repo_id="microsoft/DialoGPT-small", 
-    model_kwargs={"temperature": 0.5)
+    model_kwargs={"temperature": 0.5})
     return llm
 
 if "model" not in st.session_state:
