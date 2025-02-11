@@ -1,6 +1,12 @@
 from langchain.llms import HuggingFaceHub
 import os
+import torch
+import streamlit
 
+torch.classes.__path__ = [os.path.join(torch.__path__[0], torch.classes.__file__)] 
+
+# or simply:
+torch.classes.__path__ = []
 
 import streamlit as st
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
