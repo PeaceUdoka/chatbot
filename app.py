@@ -125,15 +125,12 @@ for msg in messages:
     st.chat_message(msg.type).write(msg.content)
 
 # Get answer to user question
-if prompt := st.chat_input(placeholder="Ask me anything!"):
-    st.session_state.prompt = prompt
-    st.chat_message("user").write(prompt)
-    # Write to streamlit
-    #messages.append(HumanMessage(content=prompt))
+if prompt_text := st.chat_input(placeholder="Ask me anything!"):
+    st.chat_message("user").write(prompt_text)
 
-    # Response from LLM and send input to RAG Chain
+    # 11. Invoke the chain, passing 'input' and 'chat_history'. Pass an empty value for context so it is still defined in the prompt template.
     response = conversational_rag_chain.invoke(
-        {"input": st.session_state.prompt},
+        {"input": prompt_text},
         config={"configurable": {"session_id": "1"}}
     )
 
