@@ -20,7 +20,29 @@ if not openai.api_key:
 MODEL = "gpt-4o"  # Specify the GPT-4o model
 
 from langchain.embeddings import HuggingFaceEmbeddings
+# ensure the notebook is in the same folder as the data files
+# load all txt files
+def load_data(path):
+  loader1 = DirectoryLoader(path, glob = '*.txt', show_progress = True)
+  # get content of txt files
+  docs = loader1.load()
 
+  return docs
+
+
+def get_chunks(docs):
+
+    # split the txt files into chunks of 1000 characters and 150 characters overlap
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 150)
+    chunks = text_splitter.split_documents(docs)
+
+
+    return chunks
+
+path = 'scraped_data'
+docs = load_data(path)
+
+data = get_chunks(docs)
 # embed data sources
 def embed(data, device, model):
   model_kwargs = {'device': device}
