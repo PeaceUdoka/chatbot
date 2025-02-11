@@ -9,18 +9,18 @@ Original file is located at
 
 # Commented out IPython magic to ensure Python compatibility.
 #move to the folder where the scraped data is on your device
-from google.colab import drive
-drive.mount('/content/drive')
+#from google.colab import drive
+#drive.mount('/content/drive')
 # %cd /content/drive/MyDrive/Data/WiChat/scraped_data
 
-!pip install virtualenv
-!virtualenv /content/drive/MyDrive/Data/WiChat
-!source /content/drive/MyDrive/Data/WiChat/bin/activate
+#!pip install virtualenv
+#!virtualenv /content/drive/MyDrive/Data/WiChat
+#!source /content/drive/MyDrive/Data/WiChat/bin/activate
 
-!curl -fsSL https://ollama.com/install.sh | sh
+#!curl -fsSL https://ollama.com/install.sh | sh
 
 # Commented out IPython magic to ensure Python compatibility.
-!pip install colab-xterm
+#!pip install colab-xterm
 # %load_ext colabxterm
 
 # run each code separately in the terminal to connect to ollama server
@@ -33,16 +33,7 @@ drive.mount('/content/drive')
 import os
 os.environ['OLLAMA_HOST'] = '127.0.0.1:11434'
 
-# install dependencies
-!pip install langchain
-!pip install -qU transformers
-!pip install -qU langchain-community
-!pip install -qU unstructured
-!pip install -qU sentence-transformers
-!pip install faiss-cpu
-!pip install langchain_ollama
 
-import re
 from langchain.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
